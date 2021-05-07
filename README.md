@@ -53,3 +53,19 @@ The extension files will be located in the `<PROJECT_HOME>/build` folder
     6. Click the back arrow to the left of `Errors`
     7. Reload the extension by clicking its `Refresh` icon
     8. Click the extension icon in the extensions toolbar and verify the react page displays as expected
+
+
+## Injecting React into a page via content script
+
+> :warning: create-react-app will generate different names for the output JS file whenever the content is changed. This prevents us from being able to statically reference the content script by name in the manifest.json file. To work around this we will eject from create-react-app.
+
+1. Run:
+```console
+yarn run eject
+```
+2. To install dependencies, run:
+```console
+yarn install
+```
+3. Open `config/webpack.config.js`
+4. To fix the script file names, delete all istances of `[hash:8].` and `[contenthash:8].` from this file
