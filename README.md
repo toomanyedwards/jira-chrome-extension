@@ -1,3 +1,6 @@
+
+https://medium.com/@mikezrimsek/fork-your-own-github-repository-19ad4582b50a
+
 ## Overview
 
 This is a basic react based Chrome browser extension. Clone this repo to create a custom react based Chrome browser extension.
