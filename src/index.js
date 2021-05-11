@@ -1,4 +1,52 @@
 
+const getIssuesLinkedToEpic = async epicKey => {
+
+  console.log(`Getting issues linked to ${epicKey}`);
+
+  var issuesLinkedToEpic = [];
+  var startAt = 0;
+  var totalLinkedIssues;
+  const maxResults = 50;
+
+  do{
+    // "Epic Link" = CC-2
+    const response = await fetch(
+      "/rest/api/2/search",
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          {
+            "jql":`'Epic Link'=${epicKey}`,
+            // To return custom fields, the pattern is "customfield_<CUSTOM_FIELD_ID>"
+            // To get the ID of a custom field GET <BASE_JIRA_URL>/rest/api/2/field and
+            // search for your custom field
+            // Field 11901 is Story Points 
+            "fields":["key","issuetype", "status", "customfield_11901"],
+            "maxResults" : maxResults,       
+            "startAt":startAt
+           }
+        )
+      }
+    );
+
+    const epicIssuesResponse = await response?.json();
+    //console.log(`Response for epic ${epicKey}:\n${JSON.stringify(epicIssuesResponse, null, 2)}`);
+    console.log(`Retrieved ${epicIssuesResponse?.issues.length} issues for epic ${epicKey}`);
+    issuesLinkedToEpic = issuesLinkedToEpic.concat(epicIssuesResponse?.issues);
+    console.log(`Fetched ${issuesLinkedToEpic?.length} of ${epicIssuesResponse?.total} for ${epicKey}`);
+
+
+    startAt=issuesLinkedToEpic?.length;
+    totalLinkedIssues = epicIssuesResponse?.total;
+
+  }while(totalLinkedIssues>issuesLinkedToEpic?.length);
+
+  return issuesLinkedToEpic;
+}
+
 /**
  * Find all Jira issue cards that are descendants 
  * @param {*} issuePool 
@@ -7,22 +55,11 @@
 const updatePoolIssues = async issuePool => {
   const issuesInPool = getJiraIssues(issuePool);
 
-/*
-  const response = await fetch(
-    '/rest/api/latest/issue/DOPE-315',
-    {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }
-  );
-
-  const result = await response.json();
-  console.log(`ghx-pool response ${JSON.stringify(result, null, 2)}`);
-
-  */
   issuesInPool?.forEach(
     issue => {
+      addDaysInColumnField(issue);
+      addStoryPointsLabel(issue);    
+
       const issueType = getIssueType(issue);
 
       if(issueType === 'Epic') {
@@ -32,77 +69,86 @@ const updatePoolIssues = async issuePool => {
       }
       console.log(`found ghx-pool issue ${getIssueKey(issue)} ${getIssueType(issue)}`);
       
-      addDaysInColumnField(issue);
-      addStoryPointsLabel(issue);    }
+      
+    }
   );
 }
 
-/*
-curl -N -u "admin:admin" -X POST -H "Accept-Encoding: gzip,deflate" -H "Content-type: application/json" --data '{"jql":"project = PROYECKEY AND (issue in allFromEpic('PROYECKEY-1') OR issue in allFromEpic('PROYECKEY-2')) AND updatedDate >= 2020-04-01 and updatedDate < 2020-05-01","startAt":0,"maxResults":10,"fields":["key","issuetype","summary","priority","status","created","updated"]}' "http://localhost:8080/rest/api/2/search"
-*/
+const markIssueNeedsAttention = (issue) => {
+  issue.setAttribute("style", "background-color:Khaki;" );
+}
+
+const markIssueAsReady = (issue) => {
+  issue.setAttribute("style", "background-color:LightBlue;" );
+}
 
 const handleEpic = async epicIssue => {
   const issueKey = getIssueKey(epicIssue);
   console.log(`Handling Epic ${issueKey}`);
 
-  // 
-  // 
-  // "Epic Link" = CC-2
-  const response = await fetch(
-    "/rest/api/2/search",
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(
-        {
-          "jql":`'Epic Link'=${issueKey}`,
-          // To return custom fields, the pattern is "customfield_<CUSTOM_FIELD_ID>"
-          // To get the ID of a custom field GET <BASE_JIRA_URL>/rest/api/2/field and
-          // search for your custom field
-          // Field 11901 is Story Points 
-          "fields":["key","issuetype", "status", "customfield_11901"]
-        }
-      )
-    }
-  );
+  const issuesLinkedToEpic = await getIssuesLinkedToEpic(issueKey);
 
-  const epicIssuesResponse = await response.json();
-
-  const epicIssuesSummary = epicIssuesResponse?.issues?.reduce(
+  const epicIssuesSummary = issuesLinkedToEpic?.reduce(
     (epicSummary, linkedIssue) => {
-      const status = linkedIssue.fields.status.name;
-      const storyPoints = linkedIssue.fields.customfield_11901;
+      const status = linkedIssue?.fields?.status?.name;
+      const storyPoints = linkedIssue?.fields?.customfield_11901;
+      const issueType = linkedIssue?.fields?.issuetype.name;
 
-      epicSummary.numberOfIssues++;
-      epicSummary.totalStoryPoints += storyPoints;
+      if(['Story', 'Spike'].includes(issueType)) {
+        epicSummary.totalNumberOfStoriesOrSpikes++;
+        epicSummary.totalStoryPoints += storyPoints;
+
+        if(status === 'Closed') {
+          epicSummary.numberOfClosedStoriesOrSpikes++;
+          epicSummary.storyPointsCompleted += storyPoints;
+        }
+
+        if(storyPoints > 0) {
+          epicSummary.numberOfStoriesOrSpikesWithEstimates++;
+        }
+      } else if (['Bug'].includes(issueType)){
+        epicSummary.totalNumberOfBugs++;
+
+        if(status === 'Closed') {
+          epicSummary.numberOfBugsClosed++;
+        }
+      }
       
-
-      if(status === 'Closed') {
-        epicSummary.numberOfClosedIssues++;
-        epicSummary.storyPointsCompleted += storyPoints;
-      }
-
-      if(storyPoints > 0) {
-        epicSummary.numberOfIssuesWithEstimates++;
-      }
-
       console.log(`Reducing issue ${linkedIssue.key} (${status}) for epic ${issueKey}`);
       return epicSummary;
     }, 
     {
-      numberOfIssues: 0,
-      numberOfIssuesWithEstimates: 0,
-      numberOfClosedIssues: 0,
+      totalNumberOfStoriesOrSpikes: 0,
+      numberOfStoriesOrSpikesWithEstimates: 0,
+      numberOfClosedStoriesOrSpikes: 0,
+      totalNumberOfBugs: 0,
+      numberOfBugsClosed: 0,
       totalStoryPoints: 0,
       storyPointsCompleted: 0
     } 
   )??{};
   
-  addIssueField(epicIssue, "issuesEstimated", `${epicIssuesSummary?.numberOfIssuesWithEstimates} of ${epicIssuesSummary?.numberOfIssues} stories estimated`);
-  addIssueField(epicIssue, "storiesCompleted", `${epicIssuesSummary?.numberOfClosedIssues} of ${epicIssuesSummary?.numberOfIssues} stories completed`);
+  addIssueField(epicIssue, "issuesEstimated", `${epicIssuesSummary?.numberOfStoriesOrSpikesWithEstimates} of ${epicIssuesSummary?.totalNumberOfStoriesOrSpikes} stories estimated`);
+  addIssueField(epicIssue, "storiesCompleted", `${epicIssuesSummary?.numberOfClosedStoriesOrSpikes} of ${epicIssuesSummary?.totalNumberOfStoriesOrSpikes} stories completed`);
   addIssueField(epicIssue, "storyPointsCompleted", `${epicIssuesSummary?.storyPointsCompleted} of ${epicIssuesSummary?.totalStoryPoints} points completed`);
+  addIssueField(epicIssue, "bugsClosed", `${epicIssuesSummary?.numberOfBugsClosed} of ${epicIssuesSummary?.totalNumberOfBugs} bugs closed`);
+
+  // Remove story points field from Epic
+  epicIssue?.querySelector("span[id='labeledStoryPointsField']")?.parentNode?.remove();
+
+  if(
+    epicIssuesSummary.numberOfStoriesOrSpikesWithEstimates === 0 
+    ||
+    (epicIssuesSummary.totalNumberOfStoriesOrSpikes != epicIssuesSummary.numberOfStoriesOrSpikesWithEstimates)
+    
+   ) {
+    markIssueNeedsAttention(epicIssue);
+  } else if (
+    epicIssuesSummary.numberOfStoriesOrSpikesWithEstimates > 0 &&
+    epicIssuesSummary.totalNumberOfStoriesOrSpikes === epicIssuesSummary.numberOfStoriesOrSpikesWithEstimates
+  ) {
+    markIssueAsReady(epicIssue);
+  }
 
   console.log(`ghx-pool response: Epic ${issueKey} has ${epicIssuesSummary.numberOfIssues} linked issues`);
   //console.log(`ghx-pool response ${epicIssuesResponse?.issues[0]?.fields.customfield_11901}`);
