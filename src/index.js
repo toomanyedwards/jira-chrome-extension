@@ -1,8 +1,6 @@
 
 const getIssuesLinkedToEpic = async epicKey => {
 
-  //console.log(`Getting issues linked to ${epicKey}`);
-
   var issuesLinkedToEpic = [];
   var startAt = 0;
   var totalLinkedIssues;
@@ -74,17 +72,19 @@ const updatePoolIssues = async issuePool => {
 
         if(issueType === 'Epic') {
           handleEpic(issue);
-        } else {
-          if(['Story', 'Spike'].includes(issueType)){
-            const storyPoints = getStoryPoints(issue);
-            console.log(`${storyPoints} points for issue ${getIssueKey(issue)}`);
-            if(storyPoints >0 ) {
-              markIssueAsReady(issue);
-            } else {
-              markIssueNeedsAttention(issue);
-            }
+        } else if(['Story', 'Spike'].includes(issueType)){
+          const storyPoints = getStoryPoints(issue);
+          console.log(`${storyPoints} points for issue ${getIssueKey(issue)}`);
+          if(storyPoints >0 ) {
+            markIssueAsReady(issue);
+          } 
+          else {
+            markIssueNeedsAttention(issue);
           }
+        } else if(['Bug'].includes(issueType)) {
+          issue.setAttribute("style", "background-color:LightPink;" );
         }
+      
         //console.log(`found ghx-pool issue ${getIssueKey(issue)} ${getIssueType(issue)}`);
         markIssueUpdated(issue);  
       } else {
@@ -95,11 +95,19 @@ const updatePoolIssues = async issuePool => {
 }
 
 const markIssueNeedsAttention = (issue) => {
-  issue.setAttribute("style", "background-color:Khaki;" );
+  if(getIssueType(issue) === 'Epic') {
+    issue.setAttribute("style", "background-color:BurlyWood;" );
+  } else {
+    issue.setAttribute("style", "background-color:Khaki;" );
+  }
 }
 
 const markIssueAsReady = (issue) => {
-  issue.setAttribute("style", "background-color:LightBlue;" );
+  if(getIssueType(issue) === 'Epic') {
+    issue.setAttribute("style", "background-color:MediumTurquoise;" );
+  } else {
+    issue.setAttribute("style", "background-color:PaleTurquoise;" );
+  } 
 }
 
 const handleEpic = async epicIssue => {
