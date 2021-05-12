@@ -1,7 +1,7 @@
 
 const getIssuesLinkedToEpic = async epicKey => {
 
-  console.log(`Getting issues linked to ${epicKey}`);
+  //console.log(`Getting issues linked to ${epicKey}`);
 
   var issuesLinkedToEpic = [];
   var startAt = 0;
@@ -34,9 +34,9 @@ const getIssuesLinkedToEpic = async epicKey => {
 
     const epicIssuesResponse = await response?.json();
     //console.log(`Response for epic ${epicKey}:\n${JSON.stringify(epicIssuesResponse, null, 2)}`);
-    console.log(`Retrieved ${epicIssuesResponse?.issues.length} issues for epic ${epicKey}`);
+    //console.log(`Retrieved ${epicIssuesResponse?.issues.length} issues for epic ${epicKey}`);
     issuesLinkedToEpic = issuesLinkedToEpic.concat(epicIssuesResponse?.issues);
-    console.log(`Fetched ${issuesLinkedToEpic?.length} of ${epicIssuesResponse?.total} for ${epicKey}`);
+    //console.log(`Fetched ${issuesLinkedToEpic?.length} of ${epicIssuesResponse?.total} for ${epicKey}`);
 
 
     startAt=issuesLinkedToEpic?.length;
@@ -45,6 +45,15 @@ const getIssuesLinkedToEpic = async epicKey => {
   }while(totalLinkedIssues>issuesLinkedToEpic?.length);
 
   return issuesLinkedToEpic;
+}
+
+const isIssueUpdated = (issue) => {
+  return issue?.getAttribute('modified-by-extension')
+}
+
+const markIssueUpdated = (issue) => {
+  console.log(`Setting modifiedByExtension`);
+  issue.setAttribute('modified-by-extension', 'true');
 }
 
 /**
@@ -57,19 +66,30 @@ const updatePoolIssues = async issuePool => {
 
   issuesInPool?.forEach(
     issue => {
-      addDaysInColumnField(issue);
-      addStoryPointsLabel(issue);    
+      if(!isIssueUpdated(issue)) {
+        addDaysInColumnField(issue);
+        addStoryPointsLabel(issue);    
 
-      const issueType = getIssueType(issue);
+        const issueType = getIssueType(issue);
 
-      if(issueType === 'Epic') {
-        handleEpic(issue);
+        if(issueType === 'Epic') {
+          handleEpic(issue);
+        } else {
+          if(['Story', 'Spike'].includes(issueType)){
+            const storyPoints = getStoryPoints(issue);
+            console.log(`${storyPoints} points for issue ${getIssueKey(issue)}`);
+            if(storyPoints >0 ) {
+              markIssueAsReady(issue);
+            } else {
+              markIssueNeedsAttention(issue);
+            }
+          }
+        }
+        //console.log(`found ghx-pool issue ${getIssueKey(issue)} ${getIssueType(issue)}`);
+        markIssueUpdated(issue);  
       } else {
-        // Handle non-epic only functionality
+        console.log(`Ignoring updated issue`);
       }
-      console.log(`found ghx-pool issue ${getIssueKey(issue)} ${getIssueType(issue)}`);
-      
-      
     }
   );
 }
@@ -150,12 +170,11 @@ const handleEpic = async epicIssue => {
     markIssueAsReady(epicIssue);
   }
 
-  console.log(`ghx-pool response: Epic ${issueKey} has ${epicIssuesSummary.numberOfIssues} linked issues`);
-  //console.log(`ghx-pool response ${epicIssuesResponse?.issues[0]?.fields.customfield_11901}`);
+  //console.log(`ghx-pool response: Epic ${issueKey} has ${epicIssuesSummary.numberOfIssues} linked issues`);
 }
 
 const addIssueField = (issue, fieldId, fieldValue )=> {
-  console.log(`Adding field ${fieldId}`);
+  //console.log(`Adding field ${fieldId}`);
   // If the daysInColumnField hasn't already been added
   if(!issue.querySelector(`span[id='${fieldId}']`)) {
     
@@ -189,11 +208,12 @@ const getStoryPoints = issue => {
     getAttribute("data-tooltip")?.
     replace("Story Points: ","");
 
-  return storyPoints??"Unknown";
+    console.log(`${storyPoints} foo points for issue ${getIssueKey(issue)}`);
+  return parseFloat(storyPoints)??0.0;
 }
 
 const addStoryPointsLabel = issue => {
-  console.log(`Adding story points lable to issue ghx-pool issue`);
+  //console.log(`Adding story points lable to issue ghx-pool issue`);
 
   // If the daysInColumnField hasn't already been added
   if(!issue.querySelector("span[id='labeledStoryPointsField']")) {
@@ -203,7 +223,7 @@ const addStoryPointsLabel = issue => {
       const storyPoints = getStoryPoints(issue);
       storyPointsSpan.textContent = `${storyPoints} story points`;
       storyPointsSpan.setAttribute("id", "labeledStoryPointsField");
-      storyPointsSpan.setAttribute("data-tooltip", `${storyPoints} story points`);
+      //storyPointsSpan.setAttribute("data-tooltip", `${storyPoints} story points`);
     }
   }
 }
@@ -218,7 +238,7 @@ const getDaysInColumn = issue => {
 }
 
 const addDaysInColumnField = issue => {
-  console.log(`Adding days in columns to issue ghx-pool issue`);
+  //console.log(`Adding days in columns to issue ghx-pool issue`);
 
   // If the daysInColumnField hasn't already been added
   if(!issue.querySelector("span[id='daysInColumnField']")) {
@@ -251,10 +271,13 @@ const getJiraIssues = issuePool => {
         mutation => {
           
           const id = mutation.target.getAttribute('id');
-
+          const classAttr = mutation.target.getAttribute('class');
+          //console.log(`mutation: id: ${id} class:${classAttr}`);
           // If the issue pool has mutated...
-          if(id==='ghx-pool') {
-            console.log(`handling ghx-pool mutation`);
+          if(id==='ghx-pool'
+           || classAttr?.includes('ghx-column')) 
+          {
+            //console.log(`handling ghx-pool mutation`);
             updatePoolIssues(mutation.target);
         }      
       } 
