@@ -1,0 +1,19 @@
+{
+  "name": "Jira Chrome Extension",
+  "version": "1.0",
+  "manifest_version": 2,
+  "browser_action": {
+      "default_popup": "index.html"
+  },
+  "content_security_policy": "script-src 'self' 'sha256-FRelBXVQB8Gg64T+V4dZyBRTjut9QNVbF+KXWsQQ5RQ='; object-src 'self'",
+  "content_scripts": [
+    {
+      "matches": [ "https://jira.private.civitaslearning.com/secure/RapidBoard*"],
+      "run_at": "document_start",
+      "js": [
+        "/static/js/main.chunk.js",
+        "/static/js/runtime-main.js"
+      ]
+    }
+  ]
+}
