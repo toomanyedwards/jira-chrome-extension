@@ -58,7 +58,8 @@ Default Jira color
 
 # Installation
 
-1.Browse to https://github.com/toomanyedwards/base-react-chrome-extension
+1. Browse to https://github.com/toomanyedwards/base-react-chrome-extension
+
 2. Press the green 'Code' button and select 'Download ZIP'. This will download the extension repo.
 3. Unzip the file on your computer locally
 4. In Chrome, browse to [chrome://extensions](chrome://extensions)
