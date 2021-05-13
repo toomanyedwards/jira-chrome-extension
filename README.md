@@ -75,6 +75,17 @@ Default Jira color
 This extension is based off Create React App (CRA). The project is ejected from CRA so that output file names remain the same and can be referenced by name in the manifest.json. Note: There may be a better way to this without ejecting from CRA. 
 
 ## To Develop the Extension
+1. Clone https://github.com/toomanyedwards/jira-chrome-extension
+2. Run 
+```console
+yarn install
+```
+3. Run 
+```console
+yarn build
+```
+4. Install the extension in Chrome by following the extension [installation](#installation) instructions starting on step 5.
+
 
 
 
