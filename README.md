@@ -13,6 +13,8 @@
       * Points Completed
       * Bugs Completed
     + [Color Coding Cards](#Color-Coding-Cards)
+- [Installation](#installation)
+  
 
 
 # Overview
@@ -49,6 +51,11 @@ Issue cards are color coded in the following fashion
 #### Fully Estimated
 - Epics - MediumTurquoise
 - Stories and Spikes - PaleTurquoise
-#### Bugs - All bugs are coded red
-#### Other issues - Default Jira color
+#### Bugs
+All bugs are coded red
+#### Other issues
+Default Jira color
+
+# Installation
+TBD
 
