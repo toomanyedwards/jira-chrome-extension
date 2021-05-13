@@ -57,5 +57,18 @@ All bugs are coded red
 Default Jira color
 
 # Installation
-TBD
+
+1.Browse to https://github.com/toomanyedwards/base-react-chrome-extension
+2. Press the green 'Code' button and select 'Download ZIP'. This will download the extension repo.
+3. Unzip the file on your computer locally
+4. In Chrome, browse to [chrome://extensions](chrome://extensions)
+5. Turn on 'Developer Mode' by click the switch in the upper right
+6. Press 'Load unpacked'
+7. In the directory selection dialog, browse to where you unzipped the repo and select /jira-chrome-extension-master/build
+8. The extension should now be installed and you will see enhanced functionality on your project's Kanban board
+
+:warning: To turn off the extension and return to standard Jira functionality browse to [chrome://extensions](chrome://extensions) and turn off the extension by the clicking the button in the lower right of the "Jira Chrome Extension" settings.
+
+# Development
+
 
