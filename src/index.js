@@ -1,49 +1,6 @@
 
-const getIssuesLinkedToEpic = async epicKey => {
+import {getIssuesLinkedToEpic} from './jiraApiUtls'
 
-  var issuesLinkedToEpic = [];
-  var startAt = 0;
-  var totalLinkedIssues;
-  const maxResults = 50;
-
-  do{
-    // "Epic Link" = CC-2
-    const response = await fetch(
-      "/rest/api/2/search",
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(
-          {
-            "jql":`'Epic Link'=${epicKey}`,
-            // To return custom fields, the pattern is "customfield_<CUSTOM_FIELD_ID>"
-            // To get the ID of a custom field GET <BASE_JIRA_URL>/rest/api/2/field and
-            // search for your custom field
-            // Field 11901 is Story Points 
-            "fields":["key","issuetype", "status", "customfield_11901"],
-            "maxResults" : maxResults,       
-            "startAt":startAt
-           }
-        )
-      }
-    );
-
-    const epicIssuesResponse = await response?.json();
-    //console.log(`Response for epic ${epicKey}:\n${JSON.stringify(epicIssuesResponse, null, 2)}`);
-    //console.log(`Retrieved ${epicIssuesResponse?.issues.length} issues for epic ${epicKey}`);
-    issuesLinkedToEpic = issuesLinkedToEpic.concat(epicIssuesResponse?.issues);
-    //console.log(`Fetched ${issuesLinkedToEpic?.length} of ${epicIssuesResponse?.total} for ${epicKey}`);
-
-
-    startAt=issuesLinkedToEpic?.length;
-    totalLinkedIssues = epicIssuesResponse?.total;
-
-  }while(totalLinkedIssues>issuesLinkedToEpic?.length);
-
-  return issuesLinkedToEpic;
-}
 
 const isIssueUpdated = (issue) => {
   return issue?.getAttribute('modified-by-extension')
@@ -114,8 +71,14 @@ const handleEpic = async epicIssue => {
   const issueKey = getIssueKey(epicIssue);
   console.log(`Handling Epic ${issueKey}`);
 
-  const issuesLinkedToEpic = await getIssuesLinkedToEpic(issueKey);
+  const issuesLinkedToEpic = await getIssuesLinkedToEpic(
+    {
+      epicKey: issueKey,
+      fields: ["key","issuetype", "status", "customfield_11901"]
+    }
+  );
 
+  console.log(`Got ${issuesLinkedToEpic.length} issues for epic ${issueKey}`);
   const epicIssuesSummary = issuesLinkedToEpic?.reduce(
     (epicSummary, linkedIssue) => {
       const status = linkedIssue?.fields?.status?.name;

@@ -11,6 +11,7 @@
       "matches": [ "https://jira.private.civitaslearning.com/secure/RapidBoard*"],
       "run_at": "document_start",
       "js": [
+        "/static/js/2.chunk.js",
         "/static/js/main.chunk.js",
         "/static/js/runtime-main.js"
       ]
