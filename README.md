@@ -72,4 +72,9 @@ Default Jira color
 
 # Development
 
+This extension is based off Create React App (CRA). The project is ejected from CRA so that output file names remain the same and can be referenced by name in the manifest.json. Note: There may be a better way to this without ejecting from CRA. 
+
+## To Develop the Extension
+
+
 
