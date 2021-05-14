@@ -85,3 +85,24 @@ export const getIssuesLinkedToEpic = async (
     }
   );
 }
+
+export const getIssueForKey = async (
+  {
+    issueKey, 
+    fields = []
+  }
+) => {
+  console.log(`Got issue for key ${issueKey} pre`);
+  const result = await makeJiraApiRequest(
+    {
+      requestPath: "search",
+      body: {
+        jql:`'key'=${issueKey}`,
+        fields
+      }
+    }
+  );
+
+  console.log(`Got issue for key ${issueKey} ${JSON.stringify(result, null, 2)}`);
+  return result;
+}

@@ -1,5 +1,6 @@
 
-import {getIssuesLinkedToEpic} from './jiraApiUtls'
+import {getIssueForKey, getIssuesLinkedToEpic} from './jiraApiUtls'
+import SampleExtensionContent from './SampleExtensionContent'
 
 
 const isIssueUpdated = (issue) => {
@@ -12,16 +13,24 @@ const markIssueUpdated = (issue) => {
 }
 
 /**
- * Find all Jira issue cards that are descendants 
- * @param {*} issuePool 
- * @returns NodeList of Jira issue cards
+ * Updates all issues that are descendents of issueAncestorEl
+ * 
+ * @param {*} issueCardsAncestorEl 
+ * @returns 
  */
-const updatePoolIssues = async issuePool => {
-  const issuesInPool = getJiraIssues(issuePool);
+const updateIssueCards = async issueCardsAncestorEl => {
+  const issueCards = getIssueCards(issueCardsAncestorEl);
 
-  issuesInPool?.forEach(
-    issue => {
+  issueCards?.forEach(
+    async issue => {
       if(!isIssueUpdated(issue)) {
+        /*await getIssueForKey(
+          {
+            issueKey:getIssueKey(issue), 
+            fields:['customfield_14102']
+          }
+        );
+        */
         addDaysInColumnField(issue);
         addStoryPointsLabel(issue);    
 
@@ -229,29 +238,33 @@ const addDaysInColumnField = issue => {
   }
 }
 
-const getJiraIssues = issuePool => {
-  return issuePool.querySelectorAll("div[class*='js-detailview']");
+/**
+ * Returns all issue cards that are descendents of the the specified ancestor el
+ * 
+ * @param {*} issueCardsAncestorEl 
+ * @returns 
+ */
+const getIssueCards = issueCardsAncestorEl => {
+  return issueCardsAncestorEl.querySelectorAll("div[class*='js-detailview']");
 }
 
 /**
- * Document mutation obeserver
+ * Observe mutations and update the board as necessary
  */
- var observer = new MutationObserver(
-  (mutations) => {  
-      mutations.forEach(
-        mutation => {
-          
-          const id = mutation.target.getAttribute('id');
-          const classAttr = mutation.target.getAttribute('class');
-          //console.log(`mutation: id: ${id} class:${classAttr}`);
-          // If the issue pool has mutated...
-          if(id==='ghx-pool'
-           || classAttr?.includes('ghx-column')) 
-          {
-            //console.log(`handling ghx-pool mutation`);
-            updatePoolIssues(mutation.target);
-        }      
-      } 
+ const observer = new MutationObserver(
+  mutations => {  
+    mutations.map(
+      mutation => {
+        const id = mutation.target.getAttribute('id');
+        const classAttr = mutation.target.getAttribute('class');
+       
+        if(
+          id==='ghx-pool' ||
+          classAttr?.includes('ghx-column')
+        ) {
+          updateIssueCards(mutation.target);
+        }
+      }       
     )
   }    
 );
