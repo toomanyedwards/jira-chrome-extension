@@ -86,6 +86,54 @@ export const getIssuesLinkedToEpic = async (
   );
 }
 
+export const getIssuesForKeys = async (keys, fields=[]) => {
+
+  if(!keys.length) {
+    return [];
+  }
+  const jql = `key in (${keys.join()})`;
+  //const jql = `key in (DOPE-516)`;
+  console.log(`je: getIssuesForKeys: number of keys: ${keys?.length}}`);
+  console.log(`je: getIssuesForKeys: jql: ${jql}}`);
+
+  const issueData = await makeJqlRequest(
+    {
+      jql,
+      fields,
+      maxResults:5000
+    }
+  );
+
+  //getIssuesLinkedToEpicsconsole.log(`je: getIssuesForKeys: ${JSON.stringify(issueData, null, 2)}`);
+  console.log(`je: getIssuesForKeys: issueData.length: ${issueData.length}`);
+
+  return issueData;
+}
+
+export const getIssuesLinkedToEpics = async (epicKeys, fields=[]) => {
+
+  if(!epicKeys.length) {
+    return [];
+  }
+  const jql = `'Epic Link' in (${epicKeys.join()})`;
+  console.log(`je: getIssuesLinkedToEpics: jql: ${jql}}`);
+
+  const issueData = await makeJqlRequest(
+    {
+      jql,
+      fields,
+      maxResults:5000
+    }
+  );
+
+  //console.log(`je: getIssuesLinkedToEpics: ${JSON.stringify(issueData, null, 2)}`);
+  console.log(`je: getIssuesLinkedToEpics: issueData.length: ${issueData.length}`);
+
+  return issueData;
+}
+
+
+
 export const getIssueForKey = async (
   {
     issueKey, 
@@ -93,7 +141,7 @@ export const getIssueForKey = async (
   }
 ) => {
   console.log(`Got issue for key ${issueKey} pre`);
-  const result = await makeJiraApiRequest(
+  const result = await makeJqlRequest(
     {
       requestPath: "search",
       body: {
@@ -103,6 +151,6 @@ export const getIssueForKey = async (
     }
   );
 
-  console.log(`Got issue for key ${issueKey} ${JSON.stringify(result, null, 2)}`);
+  //console.log(`Got issue for key ${issueKey} ${JSON.stringify(result, null, 2)}`);
   return result;
 }
