@@ -47,6 +47,15 @@ const getIssueKey = issue => {
   return issue?.key;
 }
 
+const removeExtraField = (issueCard, fieldName) => {
+  const fieldSpan = issueCard.querySelector(`span[data-tooltip*='${fieldName}:']`);
+  const fieldDiv = fieldSpan?.parentNode;
+
+  fieldDiv?.parentNode?.removeChild(fieldDiv);
+
+
+}
+
 /**
  * Returns all issues with the specified issue type
  * @param {*} issues 
@@ -361,6 +370,17 @@ const getStoryPoints = issue => {
 
 
 const applyBaseCardModifications = ({issueCard}) => {
+
+  removeExtraField(
+    issueCard,
+    'Story Points' 
+  );
+
+  removeExtraField(
+    issueCard,
+    'Pair Assignee' 
+  );
+  
   addDaysInColumnExtraField(
     getDaysInColumn(issueCard), issueCard
   );
@@ -369,7 +389,7 @@ const applyBaseCardModifications = ({issueCard}) => {
 const modifyStoryOrSpikeCard = ({issueCard, issue}) => {
   const storyPoints = getStoryPoints(issue);
 
-  addOrModifyStoryPointsField( storyPoints, issueCard);
+  addLabeledStoryPointsField( issueCard, storyPoints);
 
   if(!storyPoints) {
     colorizeCard(issueCard, 'Khaki');
@@ -408,18 +428,12 @@ const addExtraField = (issueCard, fieldId, content, tooltip) => {
   }
 }
 
-const addOrModifyStoryPointsField = (storyPoints, issueCard) => {
+const addLabeledStoryPointsField = (issueCard, storyPoints) => {
 
-  console.log(`je: addOrModifyStoryPointsField`);
-  if(!issueCard.querySelector("span[id='labeledStoryPointsField']")) {
-    const storyPointsSpan = issueCard.querySelector("span[data-tooltip*='Story Points:']");
-
-    if(storyPointsSpan) {
-      storyPointsSpan.textContent = `${storyPoints} story points`;
-      storyPointsSpan.setAttribute("id", "labeledStoryPointsField");
-      storyPointsSpan.setAttribute("data-tooltip", `${storyPoints} story points`);
-    }
-  }
+  const content = `Story Points: ${storyPoints}`;
+  addExtraField(
+    issueCard, `labeledStoryPointsField`, content, content
+  );
 }
 
 const addDaysInColumnExtraField = (daysInColumn, issueCard) => {

@@ -104,7 +104,7 @@ export const getIssuesForKeys = async (keys, fields=[]) => {
     }
   );
 
-  //getIssuesLinkedToEpicsconsole.log(`je: getIssuesForKeys: ${JSON.stringify(issueData, null, 2)}`);
+  console.log(`je: getIssuesForKeys: ${JSON.stringify(issueData, null, 2)}`);
   console.log(`je: getIssuesForKeys: issueData.length: ${issueData.length}`);
 
   return issueData;
