@@ -65,7 +65,7 @@ export const makeJqlRequest = async (
       allResultsReturned.concat(
         _.get(response, resultPropertyPath, [])
       );
-    console.log(`Got ${allResultsReturned.length} of ${totalNumberOfResults} results for jql ${jql}`);
+    console.log(`je: Got ${allResultsReturned.length} of ${totalNumberOfResults} results for jql ${jql}`);
     startAt = allResultsReturned?.length;
   }while(totalNumberOfResults>allResultsReturned.length);
 
@@ -104,7 +104,7 @@ export const getIssuesForKeys = async (keys, fields=[]) => {
     }
   );
 
-  console.log(`je: getIssuesForKeys: ${JSON.stringify(issueData, null, 2)}`);
+  //console.log(`je: getIssuesForKeys: ${JSON.stringify(issueData, null, 2)}`);
   console.log(`je: getIssuesForKeys: issueData.length: ${issueData.length}`);
 
   return issueData;
@@ -151,6 +151,5 @@ export const getIssueForKey = async (
     }
   );
 
-  //console.log(`Got issue for key ${issueKey} ${JSON.stringify(result, null, 2)}`);
   return result;
 }

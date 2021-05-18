@@ -194,6 +194,8 @@ const handleMutation = async issueCardsAncestorEl => {
   issueDataMap.forEach(
     (issueData, issueKey) => {
       const issueType = issueData.issueType;
+
+      // console.log(`Issue data foo: ${JSON.stringify(issueData, null, 2)}`);
       applyBaseCardModifications(issueData);
 
       if (IssueType.EPIC === issueType) {        
@@ -368,8 +370,43 @@ const getStoryPoints = issue => {
 }
 
 
+const addPairAssigneeAvatar = (issueCard, pairAssignee) => {
 
-const applyBaseCardModifications = ({issueCard}) => {
+  if(!pairAssignee) {
+    return;
+  }
+
+  const {displayName, avatarUrl} = pairAssignee;
+  const avatarEl = issueCard.querySelector(`div[class='ghx-avatar']`);
+
+  const text = `Pair Assignee: ${displayName}`;
+
+  avatarEl?.parentNode?.insertAdjacentHTML(
+    'beforeend', 
+    `<div class="pair-assignee-avatar">
+      <img src=${avatarUrl}
+      class="ghx-avatar-img" alt="${text}" data-tooltip="${text}" original-title="">
+    </div>` 
+  );
+}
+
+const getPairAssignee = issue => {
+  const pairAssigneeField = issue?.fields?.[PAIR_ASSIGNEE_FIELD_ID];
+
+  if(pairAssigneeField) {
+    return {
+      avatarUrl: pairAssigneeField?.avatarUrls['48x48'],
+      displayName: pairAssigneeField?.displayName
+    };
+  } else {
+    return null;
+  }
+}
+
+
+const applyBaseCardModifications = ({issueCard, issue}) => {
+  
+  addPairAssigneeAvatar(issueCard, getPairAssignee(issue));
 
   removeExtraField(
     issueCard,
@@ -481,6 +518,9 @@ const getDaysInColumn = issue => {
   return daysInColumn??"Unknown"
 }
 
+
+var pairAssigneeStyleApplied = false;
+
 /**
  * Observe mutations and update the board as necessary
  */
@@ -495,6 +535,12 @@ const getDaysInColumn = issue => {
           id==='ghx-pool' ||
           classAttr?.includes('ghx-column')
         ) {
+          if(!pairAssigneeStyleApplied) {
+            
+            applyPairAssigneeStyle();
+            pairAssigneeStyleApplied= true;
+          }
+
           handleMutation(mutation.target);
         }
       }       
@@ -512,3 +558,34 @@ const config = { childList:true, subtree:true};
  */
 
 observer.observe(target, config);
+
+
+const applyPairAssigneeStyle = () => {
+  const sheet = document.createElement('style')
+  sheet.innerHTML = pairAssigneeAvatarStyle;
+  document.body.appendChild(sheet);
+}
+
+const pairAssigneeAvatarStyle = `
+.ghx-band-1 .ghx-issue .pair-assignee-avatar {
+  right: auto;
+  top: 65px;
+}
+
+.ghx-band-1 .ghx-issue .ghx-type, .ghx-band-1 .ghx-issue .ghx-flags, .ghx-band-1 .ghx-issue .pair-assignee-avatar {
+  left: 8px;
+}
+.ghx-issue.ghx-has-avatar .pair-assignee-avatar {
+  display: block;
+}
+.ghx-issue .pair-assignee-avatar{
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 50px;
+}
+.ghx-band-2 .ghx-issue .pair-assignee-avatar {
+  right: 5px;
+  top: 30px;
+}
+`;
