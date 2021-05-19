@@ -240,16 +240,7 @@ const modifyEpicCard = ({issueCard, linkedIssues}) => {
     linkedIssuesSummary
   );
 
-  if(
-    linkedIssuesSummary.totalNumberOfStoriesOrSpikes === 0 ||
-    linkedIssuesSummary.numberOfStoriesOrSpikesWithEstimates != 
-      linkedIssuesSummary.totalNumberOfStoriesOrSpikes
-    ) {
-    colorizeCard(issueCard, 'BurlyWood');
-  } else {
-    colorizeCard(issueCard, 'MediumTurquoise');
-  }
- 
+  
 }
 
 const isStoryOrSpike = issue => {
@@ -408,6 +399,8 @@ const applyBaseCardModifications = ({issueCard, issue}) => {
   
   addPairAssigneeAvatar(issueCard, getPairAssignee(issue));
 
+  colorizeCardToJiraColor(issueCard); 
+
   removeExtraField(
     issueCard,
     'Story Points' 
@@ -428,17 +421,42 @@ const modifyStoryOrSpikeCard = ({issueCard, issue}) => {
 
   addLabeledStoryPointsField( issueCard, storyPoints);
 
-  if(!storyPoints) {
-    colorizeCard(issueCard, 'Khaki');
-  } else {
-    colorizeCard(issueCard, 'PaleTurquoise');
-  }
+  
+
 }
 
 const modifyBugCard = ({issueCard}) => {
-  colorizeCard(issueCard, 'LightPink');
+  // No-op at the moment
 }
 
+/**
+ * Colorize the entire card to the Jira card grabber color
+ * @param {*} issueCard 
+ */
+const colorizeCardToJiraColor = issueCard => {
+  const jiraCardColor = getGrabberColor(issueCard);
+
+  if(jiraCardColor){
+    colorizeCard(
+      issueCard,
+      jiraCardColor
+    );
+  }
+}
+
+const getGrabberColor = issueCard => {
+  const grabberStyle = issueCard?.querySelector(`div[class='ghx-grabber']`)?.getAttribute('style');
+
+  return grabberStyle?.replace('background-color:','')??null;
+}
+
+/*
+  inst labeledStoryPoints = `${storyPoints} story points`;
+  const content = storyPoints?labeledStoryPoints:`<b><i>${content}</i></b>`;
+  const tooltip = storyPoints?content:'Needs Estimate';
+  const style = storyPoints?'':'background-color:yellow';
+
+    */
 
 const colorizeCard = (issueCard, color) => {
   issueCard.setAttribute("style", `background-color:${color};`);

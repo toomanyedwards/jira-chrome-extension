@@ -13,7 +13,7 @@
       * Stories Completed
       * Points Completed
       * Bugs Completed
-    + [Color Coding Cards](#Color-Coding-Cards)
+    + [Colorizing Cards](#Colorizing-Cards)
 - [Installation](#installation)
   
 
@@ -45,19 +45,11 @@ This extension adds the following summary data to Epic cards
 
 :warning: To find the Jira ID of a custom field, in Jira browse to Issues>Search for Issues and click in the search bar. You will see a list of fields. For customer fields they will display as 'Field Name - cf[<CUSTOM_FIELD_ID>]'
 
-### Color Coding Cards
+### Colorizing Cards
 
-Issue cards are color coded in the following fashion
-#### Needs Estimate
-- Epics - BurlyWood
-- Stories and Spikes - Khaki
-#### Fully Estimated
-- Epics - MediumTurquoise
-- Stories and Spikes - PaleTurquoise
-#### Bugs
-All bugs are coded red
-#### Other issues
-Default Jira color
+Cards are colored based on the colors configured in Jira via Board>Configure>Card Colors
+
+**NOTE** Natively, Jira only colors a sliver of the left hand side of the card. This extension enhances that functionality by coloring the entire card.
 
 # Installation
 
