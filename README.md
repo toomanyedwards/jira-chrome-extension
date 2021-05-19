@@ -5,6 +5,7 @@
 - [Overview](#overview)
 - [Enhanced Functionality](#enhanced-functionality)
   * [Enhanced Kanban Board](#Enhanced-Kanban-Board)
+    + [Pair Assignee Avatar](#Pair-Asssignee-Avatar)
     + [Days in Column Field](#Days-in-Column-Field)
     + [Label for Story Points Custom Field](#Label-for-Story-Points-Custom-Field)
     + [Epic Summary Fields](#Epic-Summary-Fields)
@@ -22,7 +23,7 @@ This is a Chrome browser extension that enhances the functionality of Jira.
 
 # Enhanced Functionality
 ## Enhanced Kanban Board
-### Pair Assignee
+### Pair Assignee Avatar
 Avatar for the user selected in the Pair Assignee field is displayed
 ### Days in Column Field
 Adds a "days in column" field to issue cards on the Kanban board. No more just dots at the bottom of the card
