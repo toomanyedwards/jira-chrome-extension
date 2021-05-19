@@ -5,7 +5,7 @@
 - [Overview](#overview)
 - [Enhanced Functionality](#enhanced-functionality)
   * [Enhanced Kanban Board](#Enhanced-Kanban-Board)
-    + [Pair Assignee Avatar](#Pair-Asssignee-Avatar)
+    + [Pair Assignee Avatar](#Pair-Assignee-Avatar)
     + [Days in Column Field](#Days-in-Column-Field)
     + [Label for Story Points Custom Field](#Label-for-Story-Points-Custom-Field)
     + [Epic Summary Fields](#Epic-Summary-Fields)
