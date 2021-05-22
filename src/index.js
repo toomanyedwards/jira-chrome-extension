@@ -1,6 +1,31 @@
 
 import {getIssuesForKeys, getIssuesLinkedToEpics} from './jiraApiUtls'
 
+/*
+<div id="js-work-quickfilters" class="aui-expander-content ghx-quick-content" aria-expanded="true"><dt id="js-quickfilters-label" class="ghx-cursor-help" data-tooltip="Use Quick Filters to view a subset of issues. Add more in the board configuration." original-title="">Quick Filters:</dt>
+	<dd><a role="button" href="#" class="js-quickfilter-button first ghx-active" title="buzz" data-filter-id="2227" style="background-color:khaki">Support Support</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="project = DOPE AND &quot;Epic Link&quot; = DOPE-312 OR parent in (&quot;DOPE-312&quot;)" data-filter-id="2224">Solr Replacement for Inspire</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="project = DOPE AND &quot;Epic Link&quot; = DOPE-316 OR parent in (&quot;DOPE-316&quot;)" data-filter-id="2223">Inspire on Postgres</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="project = DOPE AND &quot;Epic Link&quot; = DOPE-315 OR parent in (&quot;DOPE-315&quot;)" data-filter-id="2222">Inverse Transpose</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="status = &quot;Blocked&quot; or status = &quot;Blocked by Civitas&quot; or status = &quot;Blocked By Customer&quot; " data-filter-id="2182">Blocked</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Unassigned" data-filter-id="2158">Unasssigned</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Issues Assigned to Natu
+" data-filter-id="2132">Natu</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Issues Assigned to Nick" data-filter-id="2131">Nick</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Indicates new issues that need to be vetted by the team" data-filter-id="2115">Needs review</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Recently Created Issues" data-filter-id="2064">Recently Created</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Issues Assigned to Chris B" data-filter-id="2059">Chris B</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Issues Assigned to Edward" data-filter-id="2058">Edward</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Issues Assigned to Chris Greenough" data-filter-id="2061">GreenO</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Issues Assigned to Greg Lamp" data-filter-id="2062">Greg</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Issues Assigned to Robert" data-filter-id="2063">Robert</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button   " title="Displays issues which are currently assigned to the current user" data-filter-id="1985">Only My Issues</a></dd>
+	<dd><a role="button" href="#" class="js-quickfilter-button  last " title="Displays issues which have been updated in the last day" data-filter-id="1986">Recently Updated</a></dd>
+	<dd class="ghx-quickfilter-trigger" style=""><a id="js-work-quickfilters-trigger" data-replace-text="… Show more" class="aui-expander-trigger" aria-controls="js-work-quickfilters">… Show fewer</a></dd>
+</div>
+
+*/
+
 const IssueType = {
   EPIC: 'Epic',
   STORY: 'Story',
@@ -31,12 +56,12 @@ const EPIC_LINK_FIELD_ID = 'customfield_10008';
 }
 
 
-const isIssueCardModifiedByExtension = (issueCard) => {
-  return issueCard?.getAttribute('modified-by-extension')
+const isModifiedByExtension = (element) => {
+  return element?.getAttribute('modified-by-extension')
 }
 
-const setIssueCardModifiedByExtension = (issueCard) => {
-  issueCard.setAttribute('modified-by-extension', 'true');
+const setModifiedByExtension = (element) => {
+  element.setAttribute('modified-by-extension', 'true');
 }
 
 const getIssueType = issue => {
@@ -137,7 +162,7 @@ const getIssueDataMap = (
  * @param {*} issueCardsAncestorEl 
  * @returns 
  */
-const handleMutation = async issueCardsAncestorEl => {
+const handlePoolMutation = async issueCardsAncestorEl => {
   const descendantIssueCards = getDescendantIssueCards(issueCardsAncestorEl);
 
   if(!descendantIssueCards?.length) {
@@ -509,8 +534,8 @@ const getMapOfIssueCardsThatNeedModification = issueCards => {
   
   issueCards?.forEach(
     issueCard => {
-      if( !isIssueCardModifiedByExtension(issueCard)) {
-        setIssueCardModifiedByExtension(issueCard);
+      if( !isModifiedByExtension(issueCard)) {
+        setModifiedByExtension(issueCard);
         issueCardsThatNeedModificationMap.set(
           getIssueCardKey(issueCard),
           issueCard
@@ -537,7 +562,40 @@ const getDaysInColumn = issue => {
 }
 
 
-var pairAssigneeStyleApplied = false;
+var styleRulesApplied = false;
+const areStyleRulesApplied = () => styleRulesApplied;
+const setStyleRulesApplied = () => styleRulesApplied = true;
+
+const handleQuickFiltersMutation = quickAncestorEl => {
+  const quickFiltersContainer = quickAncestorEl.querySelector(`div[id*='js-work-quickfilters']`);
+
+  if(quickFiltersContainer && !isModifiedByExtension(quickFiltersContainer)) {
+    setModifiedByExtension(quickFiltersContainer);
+
+    const quickFilters = quickFiltersContainer.querySelectorAll("a[class*='js-quickfilter-button']");
+
+    quickFilters?.forEach(
+    
+      quickFilter => {
+        const title = quickFilter.getAttribute('title');
+
+        if(title) {
+          // Attempt to read the quick filter custom config from the quick filter "title" attibute
+          // This is set via the quick filter "Description" field in the Jira UI
+          const configInFilterDescription = JSON.parse(
+            title
+          );
+
+          if(configInFilterDescription) {
+            quickFilter.setAttribute('style', configInFilterDescription.style);
+            quickFilter.setAttribute('title', configInFilterDescription.tooltip??'');
+          }
+        }
+      }
+    );
+  }
+
+}
 
 /**
  * Observe mutations and update the board as necessary
@@ -552,15 +610,20 @@ var pairAssigneeStyleApplied = false;
         if(
           id==='ghx-pool' ||
           classAttr?.includes('ghx-column')
-        ) {
-          if(!pairAssigneeStyleApplied) {
-            
-            applyPairAssigneeStyle();
-            pairAssigneeStyleApplied= true;
+        ) 
+        {
+          if(!areStyleRulesApplied()) {
+            setStyleRulesApplied();
+
+            applyStyleRules(pairAssigneeAvatarStyleRules);
+            applyStyleRules(quickFilterButtonStyleRules);
           }
 
-          handleMutation(mutation.target);
+          handlePoolMutation(mutation.target);
+        } else if (id===`gh`) {
+          handleQuickFiltersMutation(mutation.target);
         }
+    
       }       
     )
   }    
@@ -578,13 +641,30 @@ const config = { childList:true, subtree:true};
 observer.observe(target, config);
 
 
-const applyPairAssigneeStyle = () => {
+const applyStyleRules = (styleRules) => {
   const sheet = document.createElement('style')
-  sheet.innerHTML = pairAssigneeAvatarStyle;
+  sheet.innerHTML = styleRules;
   document.body.appendChild(sheet);
 }
 
-const pairAssigneeAvatarStyle = `
+
+
+
+const quickFilterButtonStyleRules =`
+.ghx-controls-filters dd a.ghx-active {
+  border: 2px solid darkgray;
+  color: #3b73af;
+  filter: drop-shadow(2px 4px 6px blue);
+  background-color:white;
+}
+
+.ghx-controls-filters dd a.ghx-active:hover {
+  background: white;
+}
+`;
+
+
+const pairAssigneeAvatarStyleRules = `
 .ghx-band-1 .ghx-issue .pair-assignee-avatar {
   right: auto;
   top: 65px;

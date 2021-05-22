@@ -13,7 +13,8 @@
       * Stories Completed
       * Points Completed
       * Bugs Completed
-    + [Colorizing Cards](#Colorizing-Cards)
+    + [Colorized Issue Cards](#Colorized-Issue-Cards)
+    + [Custom Quick Filter Button Style and Tool Tip](#Custom-Quick-Filter-Button-Style-and-Tool-Tip)
 - [Installation](#installation)
   
 
@@ -45,11 +46,26 @@ This extension adds the following summary data to Epic cards
 
 :warning: To find the Jira ID of a custom field, in Jira browse to Issues>Search for Issues and click in the search bar. You will see a list of fields. For customer fields they will display as 'Field Name - cf[<CUSTOM_FIELD_ID>]'
 
-### Colorizing Cards
+### Colorized Issue Cards
 
-Cards are colored based on the colors configured in Jira via Board>Configure>Card Colors
+Issue cards are colored based on the colors configured in Jira via Board>Configure>Card Colors
 
 **NOTE** Natively, Jira only colors a sliver of the left hand side of the card. This extension enhances that functionality by coloring the entire card.
+
+### Custom Quick Filter Button Style and Tool Tip
+
+A custom quick filter button style and tool tip may be configured by setting the filter's description field to a JSON configuration. Currently supported properties are **style** and **tooltip**.
+
+For example:
+```json
+{
+  "style":"background-color:#a8d2ff",
+  "tooltip":"Epic-455"
+}
+```
+
+**NOTE** A handy use for this functionality is to have quick filters associated with your card coloring rules and have your quick filter button color match your card color. This allows your quick filters to act as a legend for your card colors.
+
 
 # Installation
 
