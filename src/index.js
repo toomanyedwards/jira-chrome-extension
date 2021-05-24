@@ -580,15 +580,20 @@ const handleQuickFiltersMutation = quickAncestorEl => {
         const title = quickFilter.getAttribute('title');
 
         if(title) {
-          // Attempt to read the quick filter custom config from the quick filter "title" attibute
-          // This is set via the quick filter "Description" field in the Jira UI
-          const configInFilterDescription = JSON.parse(
-            title
-          );
+          try{
+            // Attempt to read the quick filter custom config from the quick filter "title" attibute
+            // This is set via the quick filter "Description" field in the Jira UI
+            const configInFilterDescription = JSON.parse(
+              title
+            );
 
-          if(configInFilterDescription) {
-            quickFilter.setAttribute('style', configInFilterDescription.style);
-            quickFilter.setAttribute('title', configInFilterDescription.tooltip??'');
+            if(configInFilterDescription) {
+              quickFilter.setAttribute('style', configInFilterDescription.style);
+              quickFilter.setAttribute('title', configInFilterDescription.tooltip??'');
+            }
+          }
+          catch(e) {
+            // no-op SytnaxError expected when JSON not configured in "Description" field
           }
         }
       }
