@@ -29,7 +29,7 @@ Avatar for the user selected in the Pair Assignee field is displayed
 ### Days in Column Field
 Adds a "days in column" field to issue cards on the Kanban board. No more just dots at the bottom of the card
 ### Label for Story Points Custom Field
-Story Points custom fields is displayed with the "story points" label vs just a raw number. 
+Story Points custom fields is displayed with the "story points" label vs just a raw number. This field is highlighted if the story is not estimated.
 
 :warning: Story point custom field must be configured in Jira in the card layout for this feature. 
 
@@ -37,7 +37,7 @@ Story Points custom fields is displayed with the "story points" label vs just a 
 
 ### Epic Summary Fields
 This extension adds the following summary data to Epic cards
-- Stories Estimated -- How many are stories linked to this Epic and how many of them are estimated (in Story Points)
+- Stories Estimated -- How many are stories linked to this Epic and how many of them are estimated (in Story Points). This field is highlighted if there are no stories linked to this Epic or if not all stories linked to this Epic are estimated.
 - Stories Completed -- How many are stories linked to this Epic and how many of them are completed
 - Points Completed -- The sum of *all* of story point estimates for stories linked to this Epic and the sum of points for all *completed* stories linked to this Epic
 - Bugs Closed -- The total number of bugs linked to this Epic and the number of bugs closed

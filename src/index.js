@@ -300,10 +300,16 @@ const addEstimatesSummaryField = (
 ) => {
   const content = 
     `${numberOfStoriesOrSpikesWithEstimates} of ${totalNumberOfStoriesOrSpikes} stories estimated`;
+
+  const style = 
+    totalNumberOfStoriesOrSpikes === 0 || totalNumberOfStoriesOrSpikes != numberOfStoriesOrSpikesWithEstimates ?
+    'background-color:yellow':'';
+
   addExtraField(issueCard, 
     'epicEstimatesSummary', 
     content,
-    content);
+    content,
+    style);
 }
 
 
@@ -475,19 +481,11 @@ const getGrabberColor = issueCard => {
   return grabberStyle?.replace('background-color:','')??null;
 }
 
-/*
-  inst labeledStoryPoints = `${storyPoints} story points`;
-  const content = storyPoints?labeledStoryPoints:`<b><i>${content}</i></b>`;
-  const tooltip = storyPoints?content:'Needs Estimate';
-  const style = storyPoints?'':'background-color:yellow';
-
-    */
-
 const colorizeCard = (issueCard, color) => {
   issueCard.setAttribute("style", `background-color:${color};`);
 }
 
-const addExtraField = (issueCard, fieldId, content, tooltip) => {
+const addExtraField = (issueCard, fieldId, content, tooltip, style='') => {
   // If the extra field hasn't already been added
   if(!issueCard.querySelector(`span[id='${fieldId}']`)) {
     
@@ -499,7 +497,7 @@ const addExtraField = (issueCard, fieldId, content, tooltip) => {
       extraFieldsDiv.insertAdjacentHTML(
         'beforeend', 
         `<div class="ghx-extra-field-row">
-          <span class="ghx-extra-field" id="${fieldId}" data-tooltip="${tooltip}">
+          <span class="ghx-extra-field" id="${fieldId}" data-tooltip="${tooltip}" style="${style}">
             <span class="ghx-extra-field-content">${content}</span>
           </span>
         </div>` 
@@ -510,9 +508,11 @@ const addExtraField = (issueCard, fieldId, content, tooltip) => {
 
 const addLabeledStoryPointsField = (issueCard, storyPoints) => {
 
+  const style = storyPoints?'':`background-color:Yellow`;
+
   const content = `Story Points: ${storyPoints}`;
   addExtraField(
-    issueCard, `labeledStoryPointsField`, content, content
+    issueCard, `labeledStoryPointsField`, content, content, style
   );
 }
 
