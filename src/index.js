@@ -204,7 +204,7 @@ const handlePoolMutation = async issueCardsAncestorEl => {
 
   console.log(`je: handleMutation: issueData.length: ${issues?.length}`);
 
-  const epicLinkedIssuesMap = getEpicLinkedIssuesMap(issues);
+  const epicLinkedIssuesMap = getEpicLinkedIssuesMap(issuesLinkedToEpics);
 
   console.log(`je: handleMutation: found ${epicLinkedIssuesMap.size} epics linked to issues `);
 
@@ -329,7 +329,7 @@ const addStoriesOrSpikesCompletedSummaryField = (
   }
 ) => {
   const content = 
-    `${numberOfStoriesOrSpikesCompleted} of ${totalNumberOfStoriesOrSpikes} stories  completed`;
+    `${numberOfStoriesOrSpikesCompleted} of ${totalNumberOfStoriesOrSpikes} stories completed`;
   addExtraField(issueCard, 
     'epicStoriesCompletedSummary', 
     content,
@@ -366,11 +366,11 @@ const getIssuesSummary = issues => {
         if(storyPoints) {
           issuesSummary.totalStoryPoints += storyPoints;        
           issuesSummary.numberOfStoriesOrSpikesWithEstimates++;
+        }
         
-          if(isClosed(issue)) {
-            issuesSummary.numberOfStoriesOrSpikesCompleted++;
-            issuesSummary.storyPointsCompleted += storyPoints;
-          }
+        if(isClosed(issue)) {
+          issuesSummary.numberOfStoriesOrSpikesCompleted++;
+          issuesSummary.storyPointsCompleted += storyPoints;
         }
       } else if (isBug(issue)) {
         issuesSummary.totalNumberOfBugs++;
