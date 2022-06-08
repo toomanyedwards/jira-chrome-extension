@@ -567,7 +567,10 @@ const areStyleRulesApplied = () => styleRulesApplied;
 const setStyleRulesApplied = () => styleRulesApplied = true;
 
 const handleQuickFiltersMutation = quickAncestorEl => {
-  const quickFiltersContainer = quickAncestorEl.querySelector(`div[id*='js-work-quickfilters']`);
+  const quickFiltersContainer = 
+    // TODO: Can we just use one selector here that matches both "work" and "plan"?
+    quickAncestorEl.querySelector(`div[id*='js-work-quickfilters']`) ?? 
+    quickAncestorEl.querySelector(`div[id*='js-plan-quickfilters']`);
 
   if(quickFiltersContainer && !isModifiedByExtension(quickFiltersContainer)) {
     setModifiedByExtension(quickFiltersContainer);
@@ -617,15 +620,14 @@ const handleQuickFiltersMutation = quickAncestorEl => {
           classAttr?.includes('ghx-column')
         ) 
         {
+          handlePoolMutation(mutation.target);
+        } else if (id===`gh`) {
           if(!areStyleRulesApplied()) {
             setStyleRulesApplied();
 
             applyStyleRules(pairAssigneeAvatarStyleRules);
             applyStyleRules(quickFilterButtonStyleRules);
           }
-
-          handlePoolMutation(mutation.target);
-        } else if (id===`gh`) {
           handleQuickFiltersMutation(mutation.target);
         }
     
